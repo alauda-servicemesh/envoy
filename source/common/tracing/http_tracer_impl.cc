@@ -48,6 +48,22 @@ static std::string buildUrl(const Http::RequestHeaderMap& request_headers,
                       valueOrDefault(request_headers.Host(), ""), path);
 }
 
+
+static std::string buildPath(const Http::RequestHeaderMap& request_headers,
+                                const uint32_t max_path_length) {
+        std::string path(request_headers.EnvoyOriginalPath()
+                         ? request_headers.EnvoyOriginalPath()->value().getStringView()
+                         : request_headers.Path()->value().getStringView());
+
+        if (path.length() > max_path_length) {
+            path = path.substr(0, max_path_length);
+        }
+
+        return path;
+
+}
+
+
 const std::string HttpTracerUtility::IngressOperation = "ingress";
 const std::string HttpTracerUtility::EgressOperation = "egress";
 
@@ -162,6 +178,8 @@ void HttpTracerUtility::finalizeDownstreamSpan(Span& span,
     }
     span.setTag(Tracing::Tags::get().HttpUrl,
                 buildUrl(*request_headers, tracing_config.maxPathTagLength()));
+    span.setTag(Tracing::Tags::get().HttpPath,
+                  buildPath(*request_headers, tracing_config.maxPathTagLength()));
     span.setTag(Tracing::Tags::get().HttpMethod,
                 std::string(request_headers->Method()->value().getStringView()));
     span.setTag(Tracing::Tags::get().DownstreamCluster,

@@ -45,6 +45,7 @@ public:
   const std::string SpanKind = "span.kind";
 
   // Non-standard tag names.
+  const std::string HttpPath = "http.path";
   const std::string DownstreamCluster = "downstream_cluster";
   const std::string ErrorReason = "error.reason";
   const std::string GrpcAuthority = "grpc.authority";
